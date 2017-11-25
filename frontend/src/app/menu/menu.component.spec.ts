@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { MenuComponent } from './menu.component';
 import { UserService } from '../user.service';
 import { UserModel } from '../models/user.model';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('MenuComponent', () => {
 
@@ -12,9 +13,10 @@ describe('MenuComponent', () => {
     logout: () => {}
   } as UserService;
   const fakeRouter = jasmine.createSpyObj('Router', ['navigate']);
+  const fakeZone = jasmine.createSpyObj('NgZone', ['runOutsideAngular']);
 
   beforeEach(async(() => TestBed.configureTestingModule({
-    imports: [RouterTestingModule],
+    imports: [RouterTestingModule, NoopAnimationsModule],
     declarations: [MenuComponent],
     providers: [
       { provide: UserService, useValue: fakeUserService }
@@ -22,13 +24,13 @@ describe('MenuComponent', () => {
   })));
 
   it('should have a `navbarCollapsed` field', () => {
-    const menu: MenuComponent = new MenuComponent(fakeUserService, fakeRouter);
+    const menu: MenuComponent = new MenuComponent(fakeUserService, fakeRouter, fakeZone);
     menu.ngOnInit();
     expect(menu.navbarCollapsed).toBe(true);
   });
 
   it('should have a `toggleNavbar` method', () => {
-    const menu: MenuComponent = new MenuComponent(fakeUserService, fakeRouter);
+    const menu: MenuComponent = new MenuComponent(fakeUserService, fakeRouter, fakeZone);
     expect(menu.toggleNavbar).not.toBeNull();
 
     menu.toggleNavbar();
@@ -42,26 +44,21 @@ describe('MenuComponent', () => {
 
   it('should toggle the class on click', () => {
     const fixture = TestBed.createComponent(MenuComponent);
+    expect(fixture.componentInstance.navbarCollapsed).toBe(true);
     const element = fixture.nativeElement;
 
     fixture.detectChanges();
-
-    const navbarCollapsed = element.querySelector('#navbar');
-    expect(navbarCollapsed).not.toBeNull();
-    expect(navbarCollapsed.classList).toContain('collapse');
 
     const button = element.querySelector('button');
     expect(button).not.toBeNull();
     button.dispatchEvent(new Event('click'));
 
     fixture.detectChanges();
-
-    const navbar = element.querySelector('#navbar');
-    expect(navbar.classList).not.toContain('collapse');
+    expect(fixture.componentInstance.navbarCollapsed).toBe(false);
   });
 
   it('should listen to userEvents in ngOnInit', fakeAsync(() => {
-    const component = new MenuComponent(fakeUserService, fakeRouter);
+    const component = new MenuComponent(fakeUserService, fakeRouter, fakeZone);
     component.ngOnInit();
 
     // emulate a login
@@ -128,7 +125,7 @@ describe('MenuComponent', () => {
   });
 
   it('should unsubscribe on destroy', () => {
-    const component = new MenuComponent(fakeUserService, fakeRouter);
+    const component = new MenuComponent(fakeUserService, fakeRouter, fakeZone);
     component.ngOnInit();
     spyOn(component.userEventsSubscription, 'unsubscribe');
     component.ngOnDestroy();
@@ -154,7 +151,7 @@ describe('MenuComponent', () => {
   });
 
   it('should stop the click event propagation', () => {
-    const component = new MenuComponent(fakeUserService, fakeRouter);
+    const component = new MenuComponent(fakeUserService, fakeRouter, fakeZone);
     const event = new Event('click');
     spyOn(fakeUserService, 'logout');
     spyOn(event, 'preventDefault');

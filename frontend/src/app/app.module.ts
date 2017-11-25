@@ -104,6 +104,7 @@ registerLocaleData(localeFr);
 import { DurationPipe } from './duration.pipe';
 import { SpentTimesComponent } from './spent-times/spent-times.component';
 import { SpentTimeAddComponent } from './spent-time-add/spent-time-add.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -172,7 +173,8 @@ import { SpentTimeAddComponent } from './spent-time-add/spent-time-add.component
     FormsModule,
     HttpClientModule,
     RouterModule.forRoot(routes),
-    NgbModule.forRoot()
+    NgbModule.forRoot(),
+    BrowserAnimationsModule
   ],
   providers: [
     PersonService,
